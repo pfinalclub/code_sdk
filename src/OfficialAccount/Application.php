@@ -25,6 +25,7 @@ class Application implements ApplicationInterface
             $this->account = new Account(
                 kid:(string) $this->config->get('kid'),
                 iss:(string) $this->config->get('iss'),
+                key_path: (string) $this->config->get('key_path'),
                 iat: (string) $this->config->get('iat'),
                 exp: (string) $this->config->get('exp'),
                 token: (string) $this->config->get('token')
@@ -39,10 +40,6 @@ class Application implements ApplicationInterface
         return $this;
     }
 
-    public function getSignature()
-    {
-
-    }
     public function getAccessToken(): AccessTokenInterface
     {
         if (!$this->accessToken) {
@@ -51,7 +48,6 @@ class Application implements ApplicationInterface
             );
             return $this->accessToken;
         }
-
         return $this->accessToken;
     }
 }

@@ -10,38 +10,44 @@ namespace CozeSdk\OfficialAccount;
 
 use CozeSdk\OfficialAccount\Contracts\Account as AccountInterface;
 use Firebase\JWT\JWT;
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
+use OpenSSLAsymmetricKey;
 use PHPUnit\Logging\Exception;
-use Random\RandomException;
 use RuntimeException;
 
 class Account implements AccountInterface
 {
     public function __construct(
-        protected string     $kid,
-        protected string     $iss,
-        protected ?string    $iat = null,
-        protected ?string    $exp = null,
-        protected ?string    $token = null,
+        protected string $kid,
+        protected string $iss,
+        protected ?string $key_path = null,
+        protected ?string $iat = null,
+        protected ?string $exp = null,
+        protected ?string $token = null,
     ){
 
     }
+
     public function getKid(): string
     {
         return $this->kid;
     }
 
-    public function getHeaderParams(): string
+    #[ArrayShape(['alg' => "string", 'typ' => "string", 'kid' => "string"])]
+    public function getHeaderParams(): array
     {
         if ($this->kid === null) {
             throw new RuntimeException('No kid configured.');
         }
-        return json_encode([
+        return [
             'alg' => "RS256",
             'typ' => "JWT",
             'kid' => $this->kid
-        ]);
+        ];
     }
 
+    #[ArrayShape(['iss' => "string", "aud" => "string", 'iat' => "int|string", 'exp' => "float|int|string", 'jti' => "string"])]
     public function getPayload(): array
     {
         if ($this->iss === null) {
@@ -57,41 +63,53 @@ class Account implements AccountInterface
         ];
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getSignature(): string
     {
-        $header_str  = $this->getHeaderParams();
-        $payload_str = $this->getPayload();
-        $signature   = '1';
+        $header  = $this->getHeaderParams();
+        $payload = $this->getPayload();
         // 使用Base64Url 编码
-        $header_payload = base64_encode($header_str) . base64_encode($payload_str);
-        // 使用 RS256 私钥为 kid 对 header_payload 进行签名
-        $privateKey = $this->getPrivateKey();
+        $signature = base64_encode(json_encode($header)) . "." . base64_encode(json_encode($payload));
         try {
-
-            $jwt = JWT::encode($data, $privateKey, 'RS256');
-
+            // 使用 RS256 私钥为 kid 对 header_payload 进行签名
+            $privateKey = $this->getPrivateKey();
+            $jwt = JWT::encode($payload, $privateKey, 'RS256');
+            $signature = $signature.".".$jwt;
         } catch (\Exception $e) {
             throw new Exception('Error encrypting signature: ' . $e->getMessage());
         }
+        echo $signature;
         return $signature;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getJti(): string
     {
         # 生成随机64位字符串
         try {
             return bin2hex(random_bytes(64));
-        } catch (RandomException $e) {
-            throw new RuntimeException($e->getMessage());
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
         }
     }
 
-    public function getPrivateKey(): string
+    /**
+     * @throws \Exception
+     */
+    public function getPrivateKey(): bool|OpenSSLAsymmetricKey
     {
-        return "
------BEGIN RSA PRIVATE KEY-----
-  {$this->getKid()}
------END RSA PRIVATE KEY-----
-";
+        if (!$this->key_path) {
+            $this->key_path = __DIR__;
+        }
+        $key_path_pr = $this->key_path .'/private_key.pem';
+        if (!file_exists($key_path_pr)) {
+            throw new \Exception(".pem 文件不存在:".$key_path_pr);
+        }
+        $private_key_content = file_get_contents($key_path_pr);
+        return openssl_pkey_get_private($private_key_content);
     }
 }

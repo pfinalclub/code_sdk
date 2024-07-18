@@ -11,8 +11,6 @@ namespace CozeSdk\OfficialAccount;
 use CozeSdk\Kernel\Contracts\AccessToken as AccessTokenInterface;
 use HttpException;
 use Psr\SimpleCache\CacheInterface;
-use Random\RandomException;
-use RuntimeException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpClient\HttpClient;
@@ -24,12 +22,13 @@ class AccessToken implements AccessTokenInterface
 
     protected CacheInterface $cache;
     const CACHE_KEY_PREFIX = 'official_account';
+
     public function __construct(
-        protected string     $sign,
-        protected ?string    $token = null,
-        ?CacheInterface      $cache = null,
+        protected string $sign,
+        protected ?string $token = null,
+        ?CacheInterface $cache = null,
         ?HttpClientInterface $httpClient = null,
-        protected ?bool      $stable = false
+        protected ?bool $stable = false
     )
     {
         $this->httpClient = $httpClient ?? HttpClient::create(['base_uri' => 'https://api.coze.cn/', 'headers' => $this->getTokenHeader()]);
@@ -76,12 +75,15 @@ class AccessToken implements AccessTokenInterface
             'GET',
             'api/permission/oauth2/token',
             [
-               "duration_seconds"=>86399,
-                "grant_type"=>"urn:ietf:params:oauth:grant-type:jwt-bearer"
+                "query" => [
+                    "duration_seconds" => 86399,
+                    "grant_type"       => "urn:ietf:params:oauth:grant-type:jwt-bearer"
+                ]
             ]
-        )->toArray(false);
+        );
+        var_dump($response);
         if (empty($response['access_token'])) {
-            throw new HttpException('Failed to get access_token: '.json_encode($response, JSON_UNESCAPED_UNICODE));
+            throw new HttpException('Failed to get access_token: ' . json_encode($response, JSON_UNESCAPED_UNICODE));
         }
 
         return $response['access_token'];
