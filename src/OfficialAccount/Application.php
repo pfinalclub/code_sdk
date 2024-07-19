@@ -44,7 +44,7 @@ class Application implements ApplicationInterface
     {
         if (!$this->accessToken) {
             $this->accessToken = new AccessToken(
-                sign: $this->getAccount()->getSignature()
+                kid:$this->getAccount()->getKid(),sign: $this->getAccount()->getSignature(),iss: $this->getAccount()->getIss(),
             );
             return $this->accessToken;
         }

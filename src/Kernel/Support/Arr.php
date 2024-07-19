@@ -138,4 +138,9 @@ class Arr
 
         return true;
     }
+
+    public static function base64UrlEncode(string $str): string
+    {
+        return rtrim(strtr(base64_encode($str), '+/', '-_'), '=');
+    }
 }

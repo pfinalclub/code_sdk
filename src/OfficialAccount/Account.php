@@ -8,10 +8,9 @@ declare(strict_types=1);
 
 namespace CozeSdk\OfficialAccount;
 
+use CozeSdk\Kernel\Support\Arr;
 use CozeSdk\OfficialAccount\Contracts\Account as AccountInterface;
-use Firebase\JWT\JWT;
 use JetBrains\PhpStorm\ArrayShape;
-use JetBrains\PhpStorm\Pure;
 use OpenSSLAsymmetricKey;
 use PHPUnit\Logging\Exception;
 use RuntimeException;
@@ -34,6 +33,11 @@ class Account implements AccountInterface
         return $this->kid;
     }
 
+    public function getIss(): string
+    {
+        return $this->iss;
+    }
+
     #[ArrayShape(['alg' => "string", 'typ' => "string", 'kid' => "string"])]
     public function getHeaderParams(): array
     {
@@ -47,6 +51,9 @@ class Account implements AccountInterface
         ];
     }
 
+    /**
+     * @throws \Exception
+     */
     #[ArrayShape(['iss' => "string", "aud" => "string", 'iat' => "int|string", 'exp' => "float|int|string", 'jti' => "string"])]
     public function getPayload(): array
     {
@@ -58,7 +65,7 @@ class Account implements AccountInterface
             'iss' => $this->iss,
             "aud" => "api.coze.cn",
             'iat' => $this->iat ?: time(),
-            'exp' => $this->exp ?: time() + 3600 * 2,
+            'exp' => $this->exp ?: time() + 3600,
             'jti' => $this->getJti()
         ];
     }
@@ -71,16 +78,15 @@ class Account implements AccountInterface
         $header  = $this->getHeaderParams();
         $payload = $this->getPayload();
         // 使用Base64Url 编码
-        $signature = base64_encode(json_encode($header)) . "." . base64_encode(json_encode($payload));
+        $signature_input = Arr::base64UrlEncode(json_encode($header)) . "." . Arr::base64UrlEncode(json_encode($payload));
         try {
             // 使用 RS256 私钥为 kid 对 header_payload 进行签名
             $privateKey = $this->getPrivateKey();
-            $jwt = JWT::encode($payload, $privateKey, 'RS256');
-            $signature = $signature.".".$jwt;
+            openssl_sign($signature_input,$signature,$privateKey,OPENSSL_ALGO_SHA256);
+            $signature = $signature_input.".".Arr::base64UrlEncode($signature);
         } catch (\Exception $e) {
             throw new Exception('Error encrypting signature: ' . $e->getMessage());
         }
-        echo $signature;
         return $signature;
     }
 

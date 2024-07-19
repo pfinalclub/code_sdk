@@ -11,6 +11,7 @@ namespace CozeSdk\OfficialAccount\Contracts;
 interface Account
 {
     public function getKid(): string;
+    public function getIss(): string;
     public function getHeaderParams(): array;
     public function getPayload(): array;
     public function getSignature(): string;
