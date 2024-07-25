@@ -17,7 +17,8 @@ use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-#[AllowDynamicProperties] class Bot implements BotInterface
+#[AllowDynamicProperties]
+class Bot implements BotInterface
 {
     protected array $defaultOptions = [
         'headers' => [
@@ -42,7 +43,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
      * @throws \HttpException
      */
-    public function __construct(AccessTokenInterface $accessToken, ?HttpClientInterface $httpClient = null,)
+    public function __construct(AccessTokenInterface $accessToken, ?HttpClientInterface $httpClient = null)
     {
         $this->access_token                               = $accessToken->getToken();
         $this->defaultOptions['headers']['Authorization'] = 'Bearer ' . $this->access_token;

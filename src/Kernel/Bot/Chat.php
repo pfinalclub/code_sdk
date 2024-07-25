@@ -10,23 +10,13 @@ namespace CozeSdk\Kernel\Bot;
 
 interface Chat
 {
-    public function getBotId(): string;
+    public function setChatId(string $chatId): void;
 
-    public function setBotId(): string;
-
-    public function sendChat(): array;
-
-    public function getAdditionalMessages(): array;
-
-    public function setAdditionalMessages(): array;
-
-    public function getStream(): bool;
-
-    public function setStream(): void;
-
-    public function getAutoSaveHistory(): bool;
-
-    public function setAutoSaveHistory(): void;
+    public function getChatId(): string;
 
     public function getMetaData(): array;
+
+    public function getMessage(): array;
+
+    public function getRole(): string;
 }
