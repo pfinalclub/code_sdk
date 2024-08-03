@@ -11,11 +11,8 @@ namespace CozeSdk\Kernel\Chat;
 interface Chat
 {
 
-    public function getMetaData(): array;
+    public function setBotId(string $botId): self;
 
-    public function getMessage(): array;
-
-    public function getRole(): string;
-
+    public function setConversationId(string $conversationId): self;
     public function query(): array;
 }

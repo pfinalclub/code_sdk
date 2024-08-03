@@ -8,32 +8,28 @@
 namespace CozeSdk\Chat;
 
 use CozeSdk\Kernel\Chat\Chat as ChatInterface;
-use CozeSdk\Kernel\Exception\HttpException;
-use CozeSdk\OfficialAccount\AccessToken as AccessTokenInterface;
-use Psr\SimpleCache\CacheInterface;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class Chat implements ChatInterface
 {
+    protected string|null $botId = null;
+    protected string|null $conversationId = null;
 
-    public function getMetaData(): array
+    public function setBotId(string $botId): Chat
     {
-        // TODO: Implement getMetaData() method.
+        $this->botId = $botId;
+        return $this;
     }
 
-    public function getMessage(): array
-    {
-        // TODO: Implement getMessage() method.
-    }
 
-    public function getRole(): string
+    public function setConversationId(string $conversationId): ChatInterface
     {
-        // TODO: Implement getRole() method.
+        $this->conversationId = $conversationId;
+        return $this;
     }
 
     public function query(): array
     {
         // TODO: Implement query() method.
     }
+
 }
