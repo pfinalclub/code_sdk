@@ -6,17 +6,16 @@
  */
 declare(strict_types=1);
 
-namespace CozeSdk\Kernel\Bot;
+namespace CozeSdk\Kernel\Chat;
 
 interface Chat
 {
-    public function setChatId(string $chatId): void;
-
-    public function getChatId(): string;
 
     public function getMetaData(): array;
 
     public function getMessage(): array;
 
     public function getRole(): string;
+
+    public function query(): array;
 }

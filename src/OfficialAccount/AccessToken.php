@@ -11,12 +11,16 @@ namespace CozeSdk\OfficialAccount;
 use AllowDynamicProperties;
 use CozeSdk\Kernel\Contracts\AccessToken as AccessTokenInterface;
 use CozeSdk\Kernel\Exception\HttpException;
-use JetBrains\PhpStorm\ArrayShape;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpClient\HttpOptions;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AllowDynamicProperties]
@@ -48,78 +52,68 @@ class AccessToken implements AccessTokenInterface
     }
 
     /**
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \HttpException
-     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \CozeSdk\Kernel\Exception\HttpException
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getToken(): string
     {
-        $token = $this->cache->get($this->getKey());
-        if ($token && is_string($token)) {
-            return $token;
+        try {
+            $token = $this->cache->get($this->getKey());
+            if ($token && is_string($token)) {
+                return $token;
+            }
+            return $this->refresh();
+        } catch (HttpException $e) {
+            throw new HttpException('Failed to get access_token: ' . $e->getMessage());
         }
-        return $this->refresh();
+
     }
 
     /**
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
      * @throws \CozeSdk\Kernel\Exception\HttpException
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \HttpException
      */
-    #[ArrayShape(['access_token' => 'string'])]
     public function toQuery(): array
     {
-        return ['access_token' => $this->getToken()];
+        try {
+            return ['access_token' => $this->getToken()];
+        } catch (HttpException|InvalidArgumentException $e) {
+            throw new HttpException('Failed to get access_token: ' . $e->getMessage());
+        }
     }
 
     /**
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \HttpException
-     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
      * @throws \CozeSdk\Kernel\Exception\HttpException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function refresh(): string
     {
-        return $this->getAccessToken();
+        try {
+            return $this->getAccessToken();
+        } catch (HttpException|InvalidArgumentException $e) {
+            throw new HttpException('Failed to get access_token: ' . $e->getMessage());
+        }
     }
 
     /**
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \HttpException
-     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
      * @throws \CozeSdk\Kernel\Exception\HttpException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAccessToken(): string
     {
-        $response = $this->httpClient->request(
-            'POST',
-            'api/permission/oauth2/token',
-            [
-                "headers" => $this->getTokenHeader(),
-                "body"    => json_encode([
-                    "duration_seconds" => 86399,
-                    "grant_type"       => "urn:ietf:params:oauth:grant-type:jwt-bearer"
-                ])
-            ]
-        )->toArray(false);
+        try {
+            $response = $this->httpClient->request(
+                'POST',
+                'api/permission/oauth2/token',
+                [
+                    "headers" => $this->getTokenHeader(),
+                    "body"    => json_encode([
+                        "duration_seconds" => 86399,
+                        "grant_type"       => "urn:ietf:params:oauth:grant-type:jwt-bearer"
+                    ])
+                ]
+            )->toArray(false);
+        } catch (ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
+            throw new HttpException('Failed to get access_token: ' . $e->getMessage());
+        }
         if (empty($response['access_token'])) {
             throw new HttpException('Failed to get access_token: ' . json_encode($response, JSON_UNESCAPED_UNICODE));
         }

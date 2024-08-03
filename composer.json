@@ -26,12 +26,13 @@
         "test": "phpunit --colors"
     },
     "require": {
-        "php":">=8.0",
+        "php": ">=8.2",
         "symfony/http-client": "^7.1",
         "psr/simple-cache": "^3.0",
         "symfony/cache": "^7.1",
         "firebase/php-jwt": "^6.10",
-        "ext-openssl": "*"
+        "ext-openssl": "*",
+        "ext-http": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.2",

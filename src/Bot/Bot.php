@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace CozeSdk\Bot;
 
-use AllowDynamicProperties;
 use CozeSdk\Kernel\Bot\Bot as BotInterface;
 use CozeSdk\Kernel\Exception\HttpException;
 use CozeSdk\Kernel\Exception\ParamsException;
@@ -17,7 +16,6 @@ use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-#[AllowDynamicProperties]
 class Bot implements BotInterface
 {
     protected array $defaultOptions = [
