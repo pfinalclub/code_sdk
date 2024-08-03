@@ -10,12 +10,9 @@ namespace CozeSdk\Kernel\Bot;
 
 interface Bot
 {
-    /**
-     * 获取bot ID
-     * getBotId
-     * @return string
-     */
-    public function getBotId(): string;
+    public function getBotIdList(): array;
+
+    public function setSpaceId(string $spaceId): self;
 
     /**
      * 获取 空间ID

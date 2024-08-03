@@ -80,7 +80,7 @@ class Conversation implements ConversationInterface
         try {
             $response = $this->httpClient->request(
                 'POST',
-                $this->apiList['chat_create'],
+                $this->apiList['conversation_create'],
                 $this->defaultOptions,
             )->toArray(false);
         } catch (ClientExceptionInterface|ServerExceptionInterface|TransportExceptionInterface|RedirectionExceptionInterface|DecodingExceptionInterface $e) {

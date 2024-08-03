@@ -14,10 +14,17 @@ use CozeSdk\Kernel\Exception\ParamsException;
 use CozeSdk\OfficialAccount\AccessToken as AccessTokenInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class Bot implements BotInterface
 {
+    protected ?array $botIdList = [];
+    protected ?string $spaceId = null;
     protected array $defaultOptions = [
         'headers' => [
             'Content-Type' => 'application/json',
@@ -32,14 +39,10 @@ class Bot implements BotInterface
     protected ?string $access_token = null;
 
     /**
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @param \CozeSdk\OfficialAccount\AccessToken $accessToken
+     * @param \Symfony\Contracts\HttpClient\HttpClientInterface|null $httpClient
      * @throws \CozeSdk\Kernel\Exception\HttpException
-     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \HttpException
      */
     public function __construct(AccessTokenInterface $accessToken, ?HttpClientInterface $httpClient = null)
     {
@@ -48,14 +51,31 @@ class Bot implements BotInterface
         $this->httpClient                                 = $httpClient ?? HttpClient::create(['base_uri' => 'https://api.coze.cn/']);
     }
 
-    public function getBotId(): string
+    public function setSpaceId($spaceId): Bot
     {
-        // TODO: Implement getBotId() method.
+        $this->spaceId = $spaceId;
+        return $this;
     }
 
     public function getSpaceId(): string
     {
-        // TODO: Implement getSpaceId() method.
+        return $this->spaceId;
+    }
+
+    /**
+     * @throws \CozeSdk\Kernel\Exception\HttpException
+     */
+    public function getBotIdList(): array
+    {
+        if (!$this->botIdList) {
+            try {
+                $botList = $this->getBotList();
+            } catch (HttpException|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
+                throw new HttpException("Failed to get bot list: " . $e->getMessage());
+            }
+            $this->botIdList = array_column($botList['space_bots'],'bot_id');
+        }
+        return $this->botIdList;
     }
 
     /**
@@ -66,11 +86,11 @@ class Bot implements BotInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
      */
-    public function getBotList(?string $spaceId = null): array
+    public function getBotList(): array
     {
-        if (!$spaceId) throw new ParamsException('spaceId is required');
+        if (!$this->spaceId) throw new ParamsException('spaceId is required');
         $this->defaultOptions['query'] = [
-            'space_id' => $spaceId
+            'space_id' => $this->spaceId
         ];
         $response                      = $this->httpClient->request(
             'GET',
@@ -80,7 +100,7 @@ class Bot implements BotInterface
         if (empty($response['data'])) {
             throw new HttpException('Failed to get bot list: ' . json_encode($response, JSON_UNESCAPED_UNICODE));
         }
-        return $response;
+        return $response['data'];
     }
 
     /**
@@ -107,6 +127,5 @@ class Bot implements BotInterface
         }
         return $response;
     }
-
 
 }
