@@ -19,6 +19,4 @@ interface Chat
     public function getMessage(): array;
 
     public function getRole(): string;
-
-    public function createTextMessage(): array;
 }
