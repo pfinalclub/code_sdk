@@ -22,6 +22,7 @@ class Chat implements ChatInterface
     protected ?string $access_token = null;
     protected ?string $chatId = null;
 
+    protected ?array $chatInfo = [];
     protected ?array $message = [];
     protected array $defaultOptions = [
         'headers' => [
@@ -55,8 +56,26 @@ class Chat implements ChatInterface
         $this->chatId = $chatId;
     }
 
+    public function setChatInfo(array $chatInfo): void
+    {
+        $this->chatInfo = $chatInfo;
+    }
+    /**
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \CozeSdk\Kernel\Exception\HttpException
+     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     */
     public function getChatId(): string
     {
+        if (is_null($this->chatId)) {
+            $chatInfo = $this->createChat();
+            if ($chatInfo['code'] == 0) {
+                $this->setChatInfo($chatInfo['data']);
+            }
+        }
         return $this->chatId;
     }
 
@@ -66,7 +85,7 @@ class Chat implements ChatInterface
 
     }
 
-    public function setMessage(array $message=[]): void
+    public function setMessage(array $message = []): void
     {
         $this->message = $message;
     }
@@ -96,7 +115,7 @@ class Chat implements ChatInterface
         if ($message) {
             $this->defaultOptions['body'] = json_encode($message);
         }
-        $response                      = $this->httpClient->request(
+        $response = $this->httpClient->request(
             'POST',
             $this->apiList['chat_create'],
             $this->defaultOptions,

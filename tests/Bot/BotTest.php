@@ -28,7 +28,7 @@ class BotTest extends TestCase
     {
         $app = new Application(
             config: [
-                'kid' => 'HC3N9VQD48ADZwrMD_uv8tQZxZ-E4eVVDHKO1XjXUNU',
+                'kid' => '87H_tatLsKzPKQGxcp8ZRJsENRZZL7oQVbpNBaHmKlw',
                 'iss' => '1135933249080',
                 'key_path' => __DIR__.'/../'
             ]
@@ -52,7 +52,7 @@ class BotTest extends TestCase
     {
         $app = new Application(
             config: [
-                'kid' => 'HC3N9VQD48ADZwrMD_uv8tQZxZ-E4eVVDHKO1XjXUNU',
+                'kid' => '87H_tatLsKzPKQGxcp8ZRJsENRZZL7oQVbpNBaHmKlw',
                 'iss' => '1135933249080',
                 'key_path' => __DIR__.'/../'
             ]

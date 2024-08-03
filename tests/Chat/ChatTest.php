@@ -34,13 +34,14 @@ class ChatTest extends TestCase
     {
         $app = new Application(
             config: [
-                'kid' => 'HC3N9VQD48ADZwrMD_uv8tQZxZ-E4eVVDHKO1XjXUNU',
+                'kid' => '87H_tatLsKzPKQGxcp8ZRJsENRZZL7oQVbpNBaHmKlw',
                 'iss' => '1135933249080',
                 'key_path' => __DIR__.'/../'
             ]
         );
         $chat = new Chat($app->getAccessToken());
-        $chat_info = $chat->createChat();
-        $this->assertIsArray($chat_info);
+        $chatId = $chat->getChatId();
+        var_dump($chatId);
+        $this->assertIsString($chatId);
     }
 }
