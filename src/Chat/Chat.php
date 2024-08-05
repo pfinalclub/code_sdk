@@ -7,6 +7,7 @@
 
 namespace CozeSdk\Chat;
 
+use Closure;
 use CozeSdk\Kernel\Chat\Chat as ChatInterface;
 use CozeSdk\Kernel\Exception\HttpException;
 use CozeSdk\OfficialAccount\AccessToken as AccessTokenInterface;
@@ -18,23 +19,19 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\ResponseStreamInterface;
+
 
 class Chat implements ChatInterface
 {
     protected string|null $botId = null;
     protected string|null $conversationId = null;
-
     protected string|null $userId = null;
-
     protected ?string $chatId = null;
-    protected int $default_response_type = 1;
-
     protected ?array $additionalMessages = [];
     protected array $apiList = [
         'chat'              => 'v3/chat',
         'chat_message_list' => 'v3/chat/message/list',
-        'chat_detail'       => 'v3/chat/retrieve'
+        'chat_detail'       => 'v3/chat/retrieve',
     ];
     protected array $defaultOptions = [
         'headers' => [
@@ -48,6 +45,7 @@ class Chat implements ChatInterface
     protected CacheInterface $cache;
     protected ?string $access_token = null;
 
+    protected Closure|array|null $build_res = null;
     public function __construct(AccessTokenInterface $accessToken, ?HttpClientInterface $httpClient = null)
     {
         $this->access_token                               = $accessToken->getToken();
@@ -95,7 +93,7 @@ class Chat implements ChatInterface
     /**
      * @throws HttpException
      */
-    public function Build(bool $response_type = false): array|ResponseStreamInterface
+    public function Build(bool $response_type = false): array|Closure
     {
         if (!$this->botId) {
             throw new HttpException("Failed to Chat: BotId is needed");
@@ -126,7 +124,30 @@ class Chat implements ChatInterface
 
             if ($response_type) {
                 // 流式请求
-                return $this->httpClient->stream($response);
+                return function () use ($response) {
+                    $stream = $this->httpClient->stream($response);
+
+                    header('Content-Type: application/json');
+                    echo "["; // Start JSON array
+                    $first = true;
+
+                    foreach ($stream as $chunk) {
+                        $content = $chunk->getContent();
+                        // Clean up content by removing unnecessary newlines and whitespace
+                        $content = trim($content);
+                        // Ensure proper JSON formatting
+                        if (!$first) {
+                            echo ","; // Add comma to separate data chunks
+                        } else {
+                            $first = false;
+                        }
+                        // Output cleaned content
+                        echo $content;
+                        flush(); // Flush output buffer
+                    }
+
+                    echo "]"; // End JSON array
+                };
             }
 
             // 非流式请求
@@ -134,7 +155,6 @@ class Chat implements ChatInterface
             if (empty($responseData['data'])) {
                 throw new HttpException('Failed to create chat: ' . json_encode($responseData, JSON_UNESCAPED_UNICODE));
             }
-            $this->setChatId($responseData['data']['id']);
             return $responseData;
         } catch (
         ClientExceptionInterface|
@@ -145,12 +165,13 @@ class Chat implements ChatInterface
         ) {
             throw new HttpException('Failed to create chat: ' . $e->getMessage());
         }
+        return $this;
     }
 
     /**
      * @throws \CozeSdk\Kernel\Exception\HttpException
      */
-    public function getChatStatus(?string $chatId): array
+    public function getChatRetrieve(?string $chatId): array
     {
         if (!$chatId) throw new HttpException("Failed to get chat detail: chatId not found");
 
@@ -172,6 +193,31 @@ class Chat implements ChatInterface
             }
         } catch (HttpException|TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface  $e) {
             throw new HttpException('Failed to get chat detail: ' . $e->getMessage());
+        }
+        return $response['data'];
+    }
+
+    /**
+     * @throws \CozeSdk\Kernel\Exception\HttpException
+     */
+    public function getChatMessageList(?string $chatId): array
+    {
+        if (!$chatId) throw new HttpException("Failed to get chat message list: chatId not found");
+        $customer_options['query'] = [
+            'chat_id'         => $chatId,
+            'conversation_id' => $this->conversationId
+        ];
+        try {
+            $response = $this->httpClient->request(
+                'GET',
+                $this->apiList['chat_message_list'],
+                array_merge($this->defaultOptions, $customer_options)
+            )->toArray(false);
+            if (empty($response['data'])) {
+                throw new HttpException('Failed to get chat message list: ' . json_encode($response, JSON_UNESCAPED_UNICODE));
+            }
+        } catch (HttpException|TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface  $e) {
+            throw new HttpException('Failed to get chat message list: ' . $e->getMessage());
         }
         return $response['data'];
     }
