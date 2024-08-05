@@ -26,12 +26,28 @@ class ChatTest extends TestCase
             ]
         );
         $chat = new Chat($app->getAccessToken());
-        $res = $chat->setBotId("7381736405354971163")->setConversationId("7399479380332003338")->setUserId("smm_1")->Query()->Build();
-        # var_dump($res);
+        $res = $chat->setBotId("7381736405354971163")->setConversationId("7399479380332003338")->setUserId("123456789")->Query("学习 PHP 语言需要什么基础？")->Build();
+        var_dump($res);
         $this->assertIsArray($res);
         $chatId = $chat->getChatId();
+        # var_dump($chatId);
         $this->assertIsString($chatId);
-        $message_status = $chat->getChatDetail();
+    }
+
+    /**
+     * @throws \CozeSdk\Kernel\Exception\HttpException
+     */
+    public function test_get_chat_status()
+    {
+        $app = new Application(
+            config: [
+                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
+                'iss' => '1135933249080',
+                'key_path' => __DIR__.'/../'
+            ]
+        );
+        $chat = new Chat($app->getAccessToken());
+        $message_status = $chat->setConversationId("7399479380332003338")->getChatStatus("7399534772378157110");
         var_dump($message_status);
         $this->assertIsArray($message_status);
     }

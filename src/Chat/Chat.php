@@ -99,8 +99,10 @@ class Chat implements ChatInterface
         // $response_type = 1 非流式响应
         if (!$this->botId) throw new HttpException("Failed to Chat: BotId is need");
         if (!$this->conversationId) throw new HttpException("Failed to Chat: ConversationId is need");
-        $api_url                  = $this->apiList['chat'] . '?conversation_id=' . $this->conversationId;
-        $customer_options["body"] = [
+        $this->defaultOptions['query'] = [
+            'conversation_id' => $this->conversationId
+        ];
+        $customer_options["body"]      = [
             "bot_id"              => $this->botId,
             "user_id"             => $this->userId,
             "stream"              => false,
@@ -110,7 +112,7 @@ class Chat implements ChatInterface
         try {
             $response = $this->httpClient->request(
                 'POST',
-                $api_url,
+                $this->apiList['chat'],
                 array_merge($this->defaultOptions, $customer_options)
             )->toArray(false);
 
@@ -127,12 +129,12 @@ class Chat implements ChatInterface
     /**
      * @throws \CozeSdk\Kernel\Exception\HttpException
      */
-    public function getChatDetail(): array
+    public function getChatStatus(?string $chatId): array
     {
-        if (!$this->getChatId()) throw new HttpException("Failed to get chat detail: chatId not found");
+        if (!$chatId) throw new HttpException("Failed to get chat detail: chatId not found");
 
         $customer_options['query'] = [
-            'chat_id'         => $this->getChatId(),
+            'chat_id'         => $chatId,
             'conversation_id' => $this->conversationId
         ];
         try {
