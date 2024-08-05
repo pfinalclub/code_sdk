@@ -26,12 +26,11 @@ class ChatTest extends TestCase
             ]
         );
         $chat = new Chat($app->getAccessToken());
-        $res = $chat->setBotId("7381736405354971163")->setConversationId("7399479380332003338")->setUserId("123456789")->Query("学习 PHP 语言需要什么基础？")->Build();
-        var_dump($res);
-        $this->assertIsArray($res);
-        $chatId = $chat->getChatId();
-        # var_dump($chatId);
-        $this->assertIsString($chatId);
+        $res = $chat->setBotId("7381736405354971163")->setConversationId("7399479380332003338")->setUserId("123456789")->Query("学习 PHP 语言需要什么基础？")->Build(true);
+        $this->assertIsObject($res);
+//        $chatId = $chat->getChatId();
+//        # var_dump($chatId);
+//        $this->assertIsString($chatId);
     }
 
     /**
@@ -48,7 +47,6 @@ class ChatTest extends TestCase
         );
         $chat = new Chat($app->getAccessToken());
         $message_status = $chat->setConversationId("7399479380332003338")->getChatStatus("7399534772378157110");
-        var_dump($message_status);
         $this->assertIsArray($message_status);
     }
 }

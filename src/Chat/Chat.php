@@ -18,6 +18,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseStreamInterface;
 
 class Chat implements ChatInterface
 {
@@ -92,38 +93,58 @@ class Chat implements ChatInterface
     }
 
     /**
-     * @throws \CozeSdk\Kernel\Exception\HttpException
+     * @throws HttpException
      */
-    public function Build(int $response_type = 1): array
+    public function Build(bool $response_type = false): array|ResponseStreamInterface
     {
-        // $response_type = 1 非流式响应
-        if (!$this->botId) throw new HttpException("Failed to Chat: BotId is need");
-        if (!$this->conversationId) throw new HttpException("Failed to Chat: ConversationId is need");
+        if (!$this->botId) {
+            throw new HttpException("Failed to Chat: BotId is needed");
+        }
+
+        if (!$this->conversationId) {
+            throw new HttpException("Failed to Chat: ConversationId is needed");
+        }
+
         $this->defaultOptions['query'] = [
-            'conversation_id' => $this->conversationId
+            'conversation_id' => $this->conversationId,
         ];
-        $customer_options["body"]      = [
-            "bot_id"              => $this->botId,
-            "user_id"             => $this->userId,
-            "stream"              => false,
-            "auto_save_history"   => true,
-            "additional_messages" => $this->defaultAdditionalMessages
+
+        $customer_options['body'] = [
+            'bot_id'              => $this->botId,
+            'user_id'             => $this->userId,
+            'stream'              => $response_type,
+            'auto_save_history'   => true,
+            'additional_messages' => $this->defaultAdditionalMessages,
         ];
+
         try {
             $response = $this->httpClient->request(
                 'POST',
                 $this->apiList['chat'],
                 array_merge($this->defaultOptions, $customer_options)
-            )->toArray(false);
+            );
 
-        } catch (ClientExceptionInterface|ServerExceptionInterface|TransportExceptionInterface|RedirectionExceptionInterface|DecodingExceptionInterface $e) {
+            if ($response_type) {
+                // 流式请求
+                return $this->httpClient->stream($response);
+            }
+
+            // 非流式请求
+            $responseData = $response->toArray(false);
+            if (empty($responseData['data'])) {
+                throw new HttpException('Failed to create chat: ' . json_encode($responseData, JSON_UNESCAPED_UNICODE));
+            }
+            $this->setChatId($responseData['data']['id']);
+            return $responseData;
+        } catch (
+        ClientExceptionInterface|
+        ServerExceptionInterface|
+        TransportExceptionInterface|
+        RedirectionExceptionInterface|
+        DecodingExceptionInterface $e
+        ) {
             throw new HttpException('Failed to create chat: ' . $e->getMessage());
         }
-        if (empty($response['data'])) {
-            throw new HttpException('Failed to create chat: ' . json_encode($response, JSON_UNESCAPED_UNICODE));
-        }
-        $this->setChatId($response['data']['id']);
-        return $response['data'];
     }
 
     /**
