@@ -14,5 +14,5 @@ interface Chat
     public function setBotId(string $botId): self;
 
     public function setConversationId(string $conversationId): self;
-    public function query(): array;
+    public function query(string|array $message):self;
 }

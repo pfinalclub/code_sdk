@@ -117,7 +117,7 @@ class AccessToken implements AccessTokenInterface
         if (empty($response['access_token'])) {
             throw new HttpException('Failed to get access_token: ' . json_encode($response, JSON_UNESCAPED_UNICODE));
         }
-        $this->cache->set($this->getKey(), $response['access_token'], intval($response['expires_in']));
+        $this->cache->set($this->getKey(), $response['access_token'], intval($response['expires_in']) - 100);
         return $response['access_token'];
     }
 

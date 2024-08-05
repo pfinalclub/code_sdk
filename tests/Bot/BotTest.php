@@ -28,7 +28,7 @@ class BotTest extends TestCase
     {
         $app = new Application(
             config: [
-                'kid' => '87H_tatLsKzPKQGxcp8ZRJsENRZZL7oQVbpNBaHmKlw',
+                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
                 'iss' => '1135933249080',
                 'key_path' => __DIR__.'/../'
             ]
@@ -52,7 +52,7 @@ class BotTest extends TestCase
     {
         $app = new Application(
             config: [
-                'kid' => '87H_tatLsKzPKQGxcp8ZRJsENRZZL7oQVbpNBaHmKlw',
+                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
                 'iss' => '1135933249080',
                 'key_path' => __DIR__.'/../'
             ]
@@ -76,14 +76,13 @@ class BotTest extends TestCase
     {
         $app = new Application(
             config: [
-                'kid' => '87H_tatLsKzPKQGxcp8ZRJsENRZZL7oQVbpNBaHmKlw',
+                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
                 'iss' => '1135933249080',
                 'key_path' => __DIR__.'/../'
             ]
         );
         $bot = new Bot($app->getAccessToken());
         $botIds = $bot->setSpaceId(spaceId:"7374606142925733940")->getBotIdList();
-        var_dump($botIds);
         $this->assertIsArray($botIds);
     }
 }

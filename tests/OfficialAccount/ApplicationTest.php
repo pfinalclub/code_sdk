@@ -21,7 +21,7 @@ class ApplicationTest extends TestCase
     {
         $app = new Application(
             config: [
-                'kid' => 'HC3N9VQD48ADZwrMD_uv8tQZxZ-E4eVVDHKO1XjXUNU',
+                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
                 'iss' => '1135933249080'
             ]
         );
@@ -35,7 +35,7 @@ class ApplicationTest extends TestCase
     {
         $app = new Application(
             config: [
-                'kid' => '87H_tatLsKzPKQGxcp8ZRJsENRZZL7oQVbpNBaHmKlw',
+                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
                 'iss' => '1135933249080',
                 'key_path' => __DIR__.'/../'
             ]
