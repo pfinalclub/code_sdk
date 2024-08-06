@@ -28,7 +28,7 @@ class ChatTest extends TestCase
     {
         $chat = new Chat($this->app->getAccessToken());
         ob_start();
-        $responseClosure = $chat->setBotId("7381736405354971163")->setConversationId("7399479380332003338")->setUserId("123456789")->Query("学习 PHP 语言需要什么基础？")->Build(true);
+        $responseClosure = $chat->setBotId("7381736405354971163")->setConversationId("7399479380332003338")->setUserId("123456789")->Query("MySql是什么？")->Build(true);
         $responseClosure();
         $output = ob_get_clean();
         var_dump($output);
