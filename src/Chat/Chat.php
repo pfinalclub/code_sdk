@@ -99,13 +99,11 @@ class Chat implements ChatInterface
             throw new HttpException("Failed to Chat: BotId is needed");
         }
 
-        if (!$this->conversationId) {
-            throw new HttpException("Failed to Chat: ConversationId is needed");
+        if ($this->conversationId) {
+            $this->defaultOptions['query'] = [
+                'conversation_id' => $this->conversationId,
+            ];
         }
-
-        $this->defaultOptions['query'] = [
-            'conversation_id' => $this->conversationId,
-        ];
 
         $customer_options['body'] = [
             'bot_id'              => $this->botId,
@@ -135,6 +133,7 @@ class Chat implements ChatInterface
                         $content = $chunk->getContent();
                         // Clean up content by removing unnecessary newlines and whitespace
                         $content = trim($content);
+                        print_r($content);
                         // Ensure proper JSON formatting
                         if (!$first) {
                             echo ","; // Add comma to separate data chunks
@@ -155,6 +154,8 @@ class Chat implements ChatInterface
             if (empty($responseData['data'])) {
                 throw new HttpException('Failed to create chat: ' . json_encode($responseData, JSON_UNESCAPED_UNICODE));
             }
+            $this->setConversationId($responseData['data']['conversation_id']);
+            $this->setChatId($responseData['data']['id']);
             return $responseData;
         } catch (
         ClientExceptionInterface|
@@ -165,7 +166,6 @@ class Chat implements ChatInterface
         ) {
             throw new HttpException('Failed to create chat: ' . $e->getMessage());
         }
-        return $this;
     }
 
     /**
@@ -174,16 +174,16 @@ class Chat implements ChatInterface
     public function getChatRetrieve(?string $chatId): array
     {
         if (!$chatId) throw new HttpException("Failed to get chat detail: chatId not found");
-
-        $customer_options['query'] = [
-            'chat_id'         => $chatId,
-            'conversation_id' => $this->conversationId
-        ];
         try {
             $response = $this->httpClient->request(
                 'GET',
                 $this->apiList['chat_detail'],
-                array_merge($this->defaultOptions, $customer_options)
+                array_merge($this->defaultOptions, [
+                    'query' => [
+                        'conversation_id' => $this->conversationId,
+                        'chat_id'         => $chatId
+                    ]
+                ])
             )->toArray(false);
             if (empty($response['data'])) {
                 throw new HttpException('Failed to get chat detail: ' . json_encode($response, JSON_UNESCAPED_UNICODE));

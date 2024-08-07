@@ -51,7 +51,7 @@ class Bot implements BotInterface
         $this->httpClient                                 = $httpClient ?? HttpClient::create(['base_uri' => 'https://api.coze.cn/']);
     }
 
-    public function setSpaceId($spaceId): Bot
+    public function setSpaceId(string $spaceId): Bot
     {
         $this->spaceId = $spaceId;
         return $this;

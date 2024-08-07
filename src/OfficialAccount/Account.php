@@ -109,9 +109,9 @@ class Account implements AccountInterface
     public function getPrivateKey(): bool|OpenSSLAsymmetricKey
     {
         if (!$this->key_path) {
-            $this->key_path = __DIR__;
+            $this->key_path = __DIR__.'/private_key.pem';
         }
-        $key_path_pr = $this->key_path .'/private_key.pem';
+        $key_path_pr = $this->key_path;
         if (!file_exists($key_path_pr)) {
             throw new \Exception(".pem 文件不存在:".$key_path_pr);
         }

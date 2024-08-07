@@ -8,8 +8,8 @@
 namespace CozeSdk\Tests\Conversation;
 
 use CozeSdk\Conversation\Conversation;
-use CozeSdk\OfficialAccount\Application;
 use CozeSdk\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class ConversationTest extends TestCase
 {
@@ -20,17 +20,12 @@ class ConversationTest extends TestCase
      * @throws \CozeSdk\Kernel\Exception\HttpException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[Group("create_cid")]
     public function test_create_conversation()
     {
-        $app = new Application(
-            config: [
-                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
-                'iss' => '1135933249080',
-                'key_path' => __DIR__.'/../'
-            ]
-        );
-        $conversation = new Conversation($app->getAccessToken());
+        $conversation = new Conversation($this->app->getAccessToken());
         $conversationId = $conversation->getConversationId();
+        var_dump($conversationId);
         $this->assertIsString($conversationId);
     }
 }

@@ -10,79 +10,55 @@ namespace CozeSdk\Tests\Bot;
 use CozeSdk\Bot\Bot;
 use CozeSdk\OfficialAccount\Application;
 use CozeSdk\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class BotTest extends TestCase
 {
-
     /**
      * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
      * @throws \CozeSdk\Kernel\Exception\HttpException
      * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \HttpException
      */
+    #[Group("bot_list")]
     public function testGetBotList()
     {
-        $app = new Application(
-            config: [
-                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
-                'iss' => '1135933249080',
-                'key_path' => __DIR__.'/../'
-            ]
-        );
-        $bot = new Bot($app->getAccessToken());
+        $bot = new Bot($this->app->getAccessToken());
         $bot_list = $bot->setSpaceId(spaceId:"7374606142925733940")->getBotList();
+        var_dump($bot_list);
         $this->assertIsArray($bot_list);
     }
 
     /**
      * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \CozeSdk\Kernel\Exception\HttpException
      * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
+     * @throws \CozeSdk\Kernel\Exception\HttpException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \HttpException
      */
+    #[Group("bot_info")]
     public function testGetBotInfo()
     {
-        $app = new Application(
-            config: [
-                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
-                'iss' => '1135933249080',
-                'key_path' => __DIR__.'/../'
-            ]
-        );
-        $bot = new Bot($app->getAccessToken());
+        $bot = new Bot($this->app->getAccessToken());
         $bot_info = $bot->getBotDetail("7381736405354971163");
         $this->assertIsArray($bot_info);
     }
 
+    #[Group("bot_ids")]
     /**
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
      * @throws \CozeSdk\Kernel\Exception\HttpException
-     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \HttpException
      */
     public function testGetBotIdList()
     {
-        $app = new Application(
-            config: [
-                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
-                'iss' => '1135933249080',
-                'key_path' => __DIR__.'/../'
-            ]
-        );
-        $bot = new Bot($app->getAccessToken());
+        $bot = new Bot($this->app->getAccessToken());
         $botIds = $bot->setSpaceId(spaceId:"7374606142925733940")->getBotIdList();
+        var_dump($botIds);
         $this->assertIsArray($botIds);
     }
 }

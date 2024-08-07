@@ -11,20 +11,15 @@ use CozeSdk\OfficialAccount\Account;
 use CozeSdk\OfficialAccount\Account as AccountInterface;
 use CozeSdk\OfficialAccount\Application;
 use CozeSdk\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class AccountTest extends TestCase
 {
 
+    #[Group("account")]
     public function test_application_can_create_account_instance()
     {
-        $app = new Application(
-            config: [
-                'kid' => 'rYOKgLMWkIqwy5Dc36lCDyJOf3wlHyCVq04RaCiE-bs',
-                'iss' => '1135933249080'
-            ]
-        );
-
-        $this->assertInstanceOf(AccountInterface::class, $app->getAccount());
+        $this->assertInstanceOf(AccountInterface::class, $this->app->getAccount());
     }
 
     public function test_get_account_kid()
@@ -40,6 +35,7 @@ class AccountTest extends TestCase
         $this->assertSame($config['kid'], $account->getKid());
     }
 
+    #[Group("account_sign")]
     /**
      * @throws \Exception
      */

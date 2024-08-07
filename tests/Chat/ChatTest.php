@@ -14,10 +14,6 @@ use PHPUnit\Framework\Attributes\Group;
 
 class ChatTest extends TestCase
 {
-    public function setUp(): void
-    {
-        parent::setUp();
-    }
     /**
      * test_chat_st
      * @return void
@@ -27,12 +23,15 @@ class ChatTest extends TestCase
     public function test_chat_st()
     {
         $chat = new Chat($this->app->getAccessToken());
-        ob_start();
-        $responseClosure = $chat->setBotId("7381736405354971163")->setConversationId("7399479380332003338")->setUserId("123456789")->Query("MySql是什么？")->Build(true);
-        $responseClosure();
-        $output = ob_get_clean();
-        var_dump($output);
-        $this->assertIsString($output);
+        $responseClosure = $chat->setBotId("7381736405354971163")->setUserId("12345678")->Query("你好,用PHP写一个循环")->Build();
+        var_dump($responseClosure);
+        $this->assertIsArray($responseClosure);
+//        ob_start();
+//        $responseClosure = $chat->setBotId("7388055232066617394")->setUserId("123456789")->Query("你好,写一个首关于风景的诗词")->Build();
+//        $responseClosure();
+//        $output = ob_get_clean();
+//        var_dump($output);
+//        $this->assertIsString($output);
         //        $this->assertIsObject($res);
         //$this->assertIsArray($res);
 //        $chatId = $chat->getChatId();
@@ -45,34 +44,22 @@ class ChatTest extends TestCase
     /**
      * @throws \CozeSdk\Kernel\Exception\HttpException
      */
+    #[Group('chat_status')]
     public function test_get_chat_status()
     {
-        $app = new Application(
-            config: [
-                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
-                'iss' => '1135933249080',
-                'key_path' => __DIR__.'/../'
-            ]
-        );
-        $chat = new Chat($app->getAccessToken());
-        $message_info = $chat->setConversationId("7399479380332003338")->getChatRetrieve("7399534772378157110");
+        $chat = new Chat($this->app->getAccessToken());
+        $message_info = $chat->setConversationId("7400272900110155828")->getChatRetrieve("7400272900110172212");
         $this->assertIsArray($message_info);
     }
 
     /**
      * @throws \CozeSdk\Kernel\Exception\HttpException
      */
+    #[Group("chat_message_list")]
     public function test_get_chat_message_list()
     {
-        $app = new Application(
-            config: [
-                'kid' => '8v5iOwlXR4QQiPlkId1FcjcbO0Jug7RpfXECW4D-uJA',
-                'iss' => '1135933249080',
-                'key_path' => __DIR__.'/../'
-            ]
-        );
-        $chat = new Chat($app->getAccessToken());
-        $message_list = $chat->setConversationId("7399479380332003338")->getChatMessageList("7399534772378157110");
+        $chat = new Chat($this->app->getAccessToken());
+        $message_list = $chat->setConversationId("7400272900110155828")->getChatMessageList("7400272900110172212");
         var_dump($message_list);
         $this->assertIsArray($message_list);
     }
