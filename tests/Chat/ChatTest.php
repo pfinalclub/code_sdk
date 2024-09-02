@@ -8,7 +8,6 @@
 namespace CozeSdk\Tests\Chat;
 
 use CozeSdk\Chat\Chat;
-use CozeSdk\OfficialAccount\Application;
 use CozeSdk\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -23,7 +22,7 @@ class ChatTest extends TestCase
     public function test_chat_st()
     {
         $chat = new Chat($this->app->getAccessToken());
-        $responseClosure = $chat->setBotId("7381736405354971163")->setUserId("12345678")->Query("你好,用PHP写一个循环")->Build();
+        $responseClosure = $chat->setBotId("7388055232066617394")->setUserId("12345678")->Query("你好,用PHP写一个循环")->Build();
         var_dump($responseClosure);
         $this->assertIsArray($responseClosure);
 //        ob_start();
@@ -48,7 +47,7 @@ class ChatTest extends TestCase
     public function test_get_chat_status()
     {
         $chat = new Chat($this->app->getAccessToken());
-        $message_info = $chat->setConversationId("7400272900110155828")->getChatRetrieve("7400272900110172212");
+        $message_info = $chat->setConversationId("7388055232066617394")->getChatRetrieve("7400272900110172212");
         $this->assertIsArray($message_info);
     }
 

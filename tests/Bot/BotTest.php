@@ -8,7 +8,6 @@
 namespace CozeSdk\Tests\Bot;
 
 use CozeSdk\Bot\Bot;
-use CozeSdk\OfficialAccount\Application;
 use CozeSdk\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -28,7 +27,6 @@ class BotTest extends TestCase
     {
         $bot = new Bot($this->app->getAccessToken());
         $bot_list = $bot->setSpaceId(spaceId:"7374606142925733940")->getBotList();
-        var_dump($bot_list);
         $this->assertIsArray($bot_list);
     }
 
