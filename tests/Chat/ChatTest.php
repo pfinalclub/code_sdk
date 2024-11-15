@@ -8,6 +8,7 @@
 namespace CozeSdk\Tests\Chat;
 
 use CozeSdk\Chat\Chat;
+use CozeSdk\Kernel\Exception\HttpException;
 use CozeSdk\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -21,8 +22,8 @@ class ChatTest extends TestCase
     #[Group("chat_build")]
     public function test_chat_st()
     {
-        $chat = new Chat($this->app->getAccessToken());
-        $responseClosure = $chat->setBotId("7388055232066617394")->setUserId("12345678")->Query("你好,用PHP写一个循环")->Build();
+        $chat = new Chat($this->app);
+        $responseClosure = $chat->setUserId("12345678")->Query("你好,用PHP写一个循环")->Build();
         var_dump($responseClosure);
         $this->assertIsArray($responseClosure);
 //        ob_start();
@@ -46,8 +47,8 @@ class ChatTest extends TestCase
     #[Group('chat_status')]
     public function test_get_chat_status()
     {
-        $chat = new Chat($this->app->getAccessToken());
-        $message_info = $chat->setConversationId("7388055232066617394")->getChatRetrieve("7400272900110172212");
+        $chat = new Chat($this->app);
+        $message_info = $chat->setConversationId("7437345865179873290")->getChatRetrieve("7437345865179889674");
         $this->assertIsArray($message_info);
     }
 
@@ -57,9 +58,18 @@ class ChatTest extends TestCase
     #[Group("chat_message_list")]
     public function test_get_chat_message_list()
     {
-        $chat = new Chat($this->app->getAccessToken());
-        $message_list = $chat->setConversationId("7400272900110155828")->getChatMessageList("7400272900110172212");
+        $chat = new Chat($this->app);
+        $message_list = $chat->setConversationId("7437345865179873290")->getChatMessageList("7437345865179889674");
         var_dump($message_list);
         $this->assertIsArray($message_list);
     }
+
+
+	#[Group("chat_send_message")]
+	public function test_send_message()
+	{
+		$chat = new Chat($this->app);
+		$message_info = $chat->sendMessage("Hello");
+		$this->assertIsArray($message_info);
+	}
 }

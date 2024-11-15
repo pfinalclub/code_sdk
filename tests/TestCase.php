@@ -20,9 +20,11 @@ class TestCase extends BaseTestCase
     {
         $app       = new Application(
             config: [
-                'kid'      => 'OGqQbsjc4h1YGtBu8PiN1uzkYSXqb0dkhGnRsDSKsWk',
+                'kid'      => 'KfkxRgxQlsn-xrtdEuTIpT4P0to7yONpHXbdxZZO7-Q',
                 'iss'      => '1135933249080',
-                'key_path' => __DIR__ . '/private_key.pem'
+                'keyPath' => __DIR__ . '/private_key.pem',
+				'spaceId' => '7374606142925733940',
+				'botId' =>'7381736405354971163'
             ]
         );
         $this->app = $app;

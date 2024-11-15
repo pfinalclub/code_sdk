@@ -42,14 +42,14 @@ class AccountTest extends TestCase
     public function test_get_account_signature()
     {
         $config = [
-            'kid' => '87H_tatLsKzPKQGxcp8ZRJsENRZZL7oQVbpNBaHmKlw',
-            'iss' => '1135933249080',
-            'key_path' => __DIR__.'/../'
+			'kid'      => 'KfkxRgxQlsn-xrtdEuTIpT4P0to7yONpHXbdxZZO7-Q',
+			'iss'      => '1135933249080',
+			'keyPath' => __DIR__ . '/../private_key.pem'
         ];
         $account = new Account(
             kid: $config['kid'],
             iss: $config['iss'],
-            key_path: $config['key_path']
+			keyPath: $config['keyPath']
         );
         $signature = $account->getSignature();
         $this->assertIsString($signature);

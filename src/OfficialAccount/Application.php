@@ -25,7 +25,7 @@ class Application implements ApplicationInterface
             $this->account = new Account(
                 kid:(string) $this->config->get('kid'),
                 iss:(string) $this->config->get('iss'),
-                key_path: (string) $this->config->get('key_path'),
+                keyPath: (string) $this->config->get('keyPath'),
                 iat: (string) $this->config->get('iat'),
                 exp: (string) $this->config->get('exp'),
                 token: (string) $this->config->get('token')
@@ -50,4 +50,9 @@ class Application implements ApplicationInterface
         }
         return $this->accessToken;
     }
+
+	public function getBotId()
+	{
+		return $this->config->get('botId');
+	}
 }

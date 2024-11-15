@@ -11,6 +11,7 @@ use Closure;
 use CozeSdk\Kernel\Chat\Chat as ChatInterface;
 use CozeSdk\Kernel\Exception\HttpException;
 use CozeSdk\OfficialAccount\AccessToken as AccessTokenInterface;
+use CozeSdk\OfficialAccount\Application;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -45,16 +46,22 @@ class Chat implements ChatInterface
     protected CacheInterface $cache;
     protected ?string $access_token = null;
 
-    protected Closure|array|null $build_res = null;
-    public function __construct(AccessTokenInterface $accessToken, ?HttpClientInterface $httpClient = null)
+	protected Application $application;
+
+	public function __construct(Application $application, ?HttpClientInterface $httpClient = null)
     {
-        $this->access_token                               = $accessToken->getToken();
+		$this->application = $application;
+        $this->access_token                               = $application->getAccessToken()->getToken();
         $this->defaultOptions['headers']['Authorization'] = 'Bearer ' . $this->access_token;
         $this->httpClient                                 = $httpClient ?? HttpClient::create(['base_uri' => 'https://api.coze.cn/']);
+		$this->botId = $application->getBotId();
     }
 
-    public function setBotId(string $botId): Chat
+    public function setBotId(?string $botId=null): Chat
     {
+		if ($botId==null) {
+			$botId = $this->application->getBotId();
+		}
         $this->botId = $botId;
         return $this;
     }
@@ -98,7 +105,6 @@ class Chat implements ChatInterface
         if (!$this->botId) {
             throw new HttpException("Failed to Chat: BotId is needed");
         }
-
         if ($this->conversationId) {
             $this->defaultOptions['query'] = [
                 'conversation_id' => $this->conversationId,
@@ -112,14 +118,15 @@ class Chat implements ChatInterface
             'auto_save_history'   => true,
             'additional_messages' => $this->defaultAdditionalMessages,
         ];
-
-        try {
+		$options = array_merge($this->defaultOptions, $customer_options);
+		// 确保 body 被转换为 JSON 字符串
+		$options['body'] = json_encode($options['body'], JSON_UNESCAPED_UNICODE);
+		try {
             $response = $this->httpClient->request(
                 'POST',
                 $this->apiList['chat'],
-                array_merge($this->defaultOptions, $customer_options)
+				$options
             );
-
             if ($response_type) {
                 // 流式请求
                 return function () use ($response) {
@@ -221,5 +228,34 @@ class Chat implements ChatInterface
         }
         return $response['data'];
     }
+
+	/**
+	 * sendMessage
+	 * @param string $message
+	 * @return array
+	 * @throws \CozeSdk\Kernel\Exception\HttpException
+	 */
+	public function sendMessage(string $message,bool $response_type = false): array
+	{
+		if (!$this->userId) {
+			// 随机生成一个 userId
+			$this->setUserId( uniqid());
+		}
+		$this->Query($message)->Build($response_type);
+		try {
+			while (true) {
+				$status_info =  $this->getChatRetrieve($this->chatId);
+				print_r($status_info,PHP_EOL);
+				if ($status_info['status'] == 'done') {
+					return $this->getChatMessageList($this->chatId);
+				}
+				sleep(1);
+			}
+
+
+		} catch (HttpException $e) {
+			throw new HttpException('Failed to send message: ' . $e->getMessage());
+		}
+	}
 
 }

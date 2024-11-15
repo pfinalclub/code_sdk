@@ -56,7 +56,6 @@ class BotTest extends TestCase
     {
         $bot = new Bot($this->app->getAccessToken());
         $botIds = $bot->setSpaceId(spaceId:"7374606142925733940")->getBotIdList();
-        var_dump($botIds);
         $this->assertIsArray($botIds);
     }
 }

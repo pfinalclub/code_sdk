@@ -1,121 +1,128 @@
 <?php
-/**
- * Author: PFinal南丞
- * Date: 2024/7/18
- * Email: <lampxiezi@163.com>
- */
-declare(strict_types=1);
+	/**
+	 * Author: PFinal南丞
+	 * Date: 2024/7/18
+	 * Email: <lampxiezi@163.com>
+	 */
+	declare(strict_types=1);
 
-namespace CozeSdk\OfficialAccount;
+	namespace CozeSdk\OfficialAccount;
 
-use CozeSdk\Kernel\Support\Arr;
-use CozeSdk\OfficialAccount\Contracts\Account as AccountInterface;
-use JetBrains\PhpStorm\ArrayShape;
-use OpenSSLAsymmetricKey;
-use PHPUnit\Logging\Exception;
-use RuntimeException;
+	use CozeSdk\Kernel\Support\Arr;
+	use CozeSdk\OfficialAccount\Contracts\Account as AccountInterface;
+	use JetBrains\PhpStorm\ArrayShape;
+	use OpenSSLAsymmetricKey;
+	use RuntimeException;
 
-class Account implements AccountInterface
-{
-    public function __construct(
-        protected string $kid,
-        protected string $iss,
-        protected ?string $key_path = null,
-        protected ?string $iat = null,
-        protected ?string $exp = null,
-        protected ?string $token = null,
-    ){
+	class Account implements AccountInterface
+	{
+		private string $kid;
+		private string $iss;
+		private ?string $keyPath;
+		private ?string $iat;
+		private ?string $exp;
+		private ?string $token;
 
-    }
+		public function __construct(
+			string  $kid,
+			string  $iss,
+			?string $keyPath = null,
+			?string $iat = null,
+			?string $exp = null,
+			?string $token = null
+		)
+		{
+			$this->kid     = $kid;
+			$this->iss     = $iss;
+			$this->keyPath = $keyPath;
+			$this->iat     = $iat;
+			$this->exp     = $exp;
+			$this->token   = $token;
+		}
 
-    public function getKid(): string
-    {
-        return $this->kid;
-    }
+		public function getKid(): string
+		{
+			return $this->kid;
+		}
 
-    public function getIss(): string
-    {
-        return $this->iss;
-    }
+		public function getIss(): string
+		{
+			return $this->iss;
+		}
 
-    #[ArrayShape(['alg' => "string", 'typ' => "string", 'kid' => "string"])]
-    public function getHeaderParams(): array
-    {
-        if ($this->kid === null) {
-            throw new RuntimeException('No kid configured.');
-        }
-        return [
-            'alg' => "RS256",
-            'typ' => "JWT",
-            'kid' => $this->kid
-        ];
-    }
+		#[ArrayShape(['alg' => "string", 'typ' => "string", 'kid' => "string"])]
+		public function getHeaderParams(): array
+		{
+			if (!$this->kid) {
+				throw new RuntimeException('No kid configured.');
+			}
 
-    /**
-     * @throws \Exception
-     */
-    #[ArrayShape(['iss' => "string", "aud" => "string", 'iat' => "int|string", 'exp' => "float|int|string", 'jti' => "string"])]
-    public function getPayload(): array
-    {
-        if ($this->iss === null) {
-            throw new RuntimeException('No iss configured.');
-        }
+			return [
+				'alg' => "RS256",
+				'typ' => "JWT",
+				'kid' => $this->kid
+			];
+		}
 
-        return [
-            'iss' => $this->iss,
-            "aud" => "api.coze.cn",
-            'iat' => $this->iat ?: time(),
-            'exp' => $this->exp ?: time() + 3600,
-            'jti' => $this->getJti()
-        ];
-    }
+		/**
+		 * @throws \Exception
+		 */
+		#[ArrayShape(['iss' => "string", "aud" => "string", 'iat' => "int|string", 'exp' => "float|int|string", 'jti' => "string"])]
+		public function getPayload(): array
+		{
+			if (!$this->iss) {
+				throw new RuntimeException('No iss configured.');
+			}
 
-    /**
-     * @throws \Exception
-     */
-    public function getSignature(): string
-    {
-        $header  = $this->getHeaderParams();
-        $payload = $this->getPayload();
-        // 使用Base64Url 编码
-        $signature_input = Arr::base64UrlEncode(json_encode($header)) . "." . Arr::base64UrlEncode(json_encode($payload));
-        try {
-            // 使用 RS256 私钥为 kid 对 header_payload 进行签名
-            $privateKey = $this->getPrivateKey();
-            openssl_sign($signature_input,$signature,$privateKey,OPENSSL_ALGO_SHA256);
-            $signature = $signature_input.".".Arr::base64UrlEncode($signature);
-        } catch (\Exception $e) {
-            throw new Exception('Error encrypting signature: ' . $e->getMessage());
-        }
-        return $signature;
-    }
+			return [
+				'iss' => $this->iss,
+				"aud" => "api.coze.cn",
+				'iat' => $this->iat ?: time(),
+				'exp' => $this->exp ?: time() + 3600,
+				'jti' => $this->getJti()
+			];
+		}
 
-    /**
-     * @throws \Exception
-     */
-    public function getJti(): string
-    {
-        # 生成随机64位字符串
-        try {
-            return bin2hex(random_bytes(64));
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
-        }
-    }
+		/**
+		 * @throws \Exception
+		 */
+		public function getSignature(): string
+		{
+			$header  = $this->getHeaderParams();
+			$payload = $this->getPayload();
 
-    /**
-     * @throws \Exception
-     */
-    public function getPrivateKey(): bool|OpenSSLAsymmetricKey
-    {
-        if (!$this->key_path) {
-            $this->key_path = __DIR__.'/private_key.pem';
-        }
-        $key_path_pr = $this->key_path;
-        if (!file_exists($key_path_pr)) {
-            throw new \Exception(".pem 文件不存在:".$key_path_pr);
-        }
-        $private_key_content = file_get_contents($key_path_pr);
-        return openssl_pkey_get_private($private_key_content);
-    }
-}
+			$signatureInput = Arr::base64UrlEncode(json_encode($header)) . "." . Arr::base64UrlEncode(json_encode($payload));
+
+			$privateKey = $this->getPrivateKey();
+
+			openssl_sign($signatureInput, $signature, $privateKey, OPENSSL_ALGO_SHA256);
+
+			return $signatureInput . "." . Arr::base64UrlEncode($signature);
+		}
+
+		/**
+		 * @throws \Exception
+		 */
+		public function getJti(): string
+		{
+			return bin2hex(random_bytes(64));
+		}
+
+		/**
+		 * @throws \Exception
+		 */
+		public function getPrivateKey(): OpenSSLAsymmetricKey
+		{
+			if (!$this->keyPath) {
+				$this->keyPath = __DIR__ . '/private_key.pem';
+			}
+
+			if (!file_exists($this->keyPath)) {
+				throw new RuntimeException("Private key file not found: {$this->keyPath}");
+			}
+
+			$privateKeyContent = file_get_contents($this->keyPath);
+
+			return openssl_pkey_get_private($privateKeyContent);
+		}
+	}
