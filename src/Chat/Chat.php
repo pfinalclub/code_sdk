@@ -10,7 +10,6 @@ namespace CozeSdk\Chat;
 use Closure;
 use CozeSdk\Kernel\Chat\Chat as ChatInterface;
 use CozeSdk\Kernel\Exception\HttpException;
-use CozeSdk\OfficialAccount\AccessToken as AccessTokenInterface;
 use CozeSdk\OfficialAccount\Application;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\HttpClient\HttpClient;
@@ -232,6 +231,7 @@ class Chat implements ChatInterface
 	/**
 	 * sendMessage
 	 * @param string $message
+	 * @param bool $response_type
 	 * @return array
 	 * @throws \CozeSdk\Kernel\Exception\HttpException
 	 */
@@ -245,8 +245,7 @@ class Chat implements ChatInterface
 		try {
 			while (true) {
 				$status_info =  $this->getChatRetrieve($this->chatId);
-				print_r($status_info,PHP_EOL);
-				if ($status_info['status'] == 'done') {
+				if ($status_info['status'] == 'completed') {
 					return $this->getChatMessageList($this->chatId);
 				}
 				sleep(1);
