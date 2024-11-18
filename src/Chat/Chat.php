@@ -97,6 +97,7 @@ class Chat implements ChatInterface
     }
 
     /**
+	 * 创建一个新的聊天互殴话
      * @throws HttpException
      */
     public function Build(bool $response_type = false): array|Closure
