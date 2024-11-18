@@ -8,7 +8,6 @@
 namespace CozeSdk\Tests\Chat;
 
 use CozeSdk\Chat\Chat;
-use CozeSdk\Kernel\Exception\HttpException;
 use CozeSdk\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -24,7 +23,7 @@ class ChatTest extends TestCase
     {
         $chat = new Chat($this->app);
         $responseClosure = $chat->setUserId("12345678")->Query("你好,用PHP写一个循环")->Build();
-        var_dump($responseClosure);
+        print_r(json_encode($responseClosure, JSON_UNESCAPED_UNICODE).PHP_EOL);
         $this->assertIsArray($responseClosure);
     }
 //
@@ -48,7 +47,7 @@ class ChatTest extends TestCase
     {
         $chat = new Chat($this->app);
         $message_list = $chat->setConversationId("7437376554340024358")->getChatMessageList("7437376554340040742");
-        var_dump($message_list);
+        print_r(json_encode($message_list, JSON_UNESCAPED_UNICODE).PHP_EOL);
         $this->assertIsArray($message_list);
     }
 
