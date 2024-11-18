@@ -250,8 +250,6 @@ class Chat implements ChatInterface
 				}
 				sleep(1);
 			}
-
-
 		} catch (HttpException $e) {
 			throw new HttpException('Failed to send message: ' . $e->getMessage());
 		}

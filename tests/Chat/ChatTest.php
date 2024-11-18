@@ -70,8 +70,7 @@ class ChatTest extends TestCase
 	public function test_send_message()
 	{
 		$chat = new Chat($this->app);
-		$message_info = $chat->sendMessage("Laravel 路由测试");
-		var_dump($message_info);
+		$message_info = $chat->sendMessage("PHP 接口是什么?");
 		$this->assertIsArray($message_info);
 	}
 }

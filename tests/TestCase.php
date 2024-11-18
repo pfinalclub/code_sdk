@@ -20,7 +20,7 @@
 		{
 			$app       = new Application(
 				config: [
-					'kid'     => 'KfkxRgxQlsn-xrtdEuTIpT4P0to7yONpHXbdxZZO7-Q',
+					'kid'     => 'Mh9cF6xnzFdqL5osVx-i1Os6-mM7Psjb1swU7UBgJ6Q',
 					'iss'     => '1135933249080',
 					'keyPath' => __DIR__ . '/private_key.pem',
 					'spaceId' => '7374606142925733940',
