@@ -42,8 +42,8 @@ class AccountTest extends TestCase
     public function test_get_account_signature()
     {
         $config = [
-			'kid'      => 'KfkxRgxQlsn-xrtdEuTIpT4P0to7yONpHXbdxZZO7-Q',
-			'iss'      => '1135933249080',
+			'kid'     => 'KfkxRgxQlsn-xrtdEuTIpT4P0to7yONpHXbdxZZO7-Q',
+			'iss'     => '1135933249080',
 			'keyPath' => __DIR__ . '/../private_key.pem'
         ];
         $account = new Account(
