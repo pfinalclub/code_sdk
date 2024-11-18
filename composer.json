@@ -1,7 +1,14 @@
 {
     "name": "pfinalclub/coze_sdk",
-    "description": "Coze SDK",
+    "description": "Coze AI PHP 版本的 SDK",
     "license": "MIT",
+    "homepage": "https://github.com/pfinalclub/coze_sdk",
+    "keywords": [
+        "coze",
+        "AI",
+        "pfinal",
+        "PFinalClub"
+    ] ,
     "autoload": {
         "psr-4": {
             "CozeSdk\\": "src/"
@@ -15,7 +22,8 @@
     "authors": [
         {
             "name": "pfinal南丞",
-            "email":"lampxiezi@163.com"
+            "email":"lampxiezi@163.com",
+            "homepage": "http://friday-go.cc/"
         }
     ],
     "scripts": {
@@ -27,7 +35,7 @@
     },
     "require": {
         "php": ">=8.2",
-        "symfony/http-client": "^7.1",
+        "symfony/http-client": "7.1.8.0",
         "psr/simple-cache": "^3.0",
         "symfony/cache": "^7.1",
         "firebase/php-jwt": "^6.10",
